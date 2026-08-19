@@ -15,6 +15,8 @@ pub use tauri_utils::{config::Color, WindowEffect as Effect, WindowEffectState a
 #[cfg(desktop)]
 pub use crate::runtime::ProgressBarStatus;
 
+#[cfg(target_os = "ios")]
+use crate::runtime::dpi::{Position, Size};
 use crate::{
   app::AppHandle,
   event::{Event, EventId, EventTarget},
@@ -1047,8 +1049,11 @@ impl<R: Runtime> Window<R> {
   }
 
   /// Adds a new webview as a child of this window.
-  #[cfg(any(test, all(desktop, feature = "unstable")))]
-  #[cfg_attr(docsrs, doc(cfg(all(desktop, feature = "unstable"))))]
+  #[cfg(any(test, all(feature = "unstable", any(desktop, target_os = "ios"))))]
+  #[cfg_attr(
+    docsrs,
+    doc(cfg(all(feature = "unstable", any(desktop, target_os = "ios"))))
+  )]
   pub fn add_child<P: Into<Position>, S: Into<Size>>(
     &self,
     webview_builder: WebviewBuilder<R>,

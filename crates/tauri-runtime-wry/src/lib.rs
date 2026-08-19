@@ -4901,10 +4901,18 @@ You may have it installed on another user account, but it is not available for t
   )))]
   let webview_builder = WebViewBuilder::new_with_web_context(&mut web_context.inner);
 
+  let transparent = webview_attributes.transparent;
   let mut webview_builder = webview_builder
     .with_id(&label)
     .with_focused(webview_attributes.focus)
-    .with_transparent(webview_attributes.transparent)
+    // WKWebView transparency can be implemented with public UIKit APIs on iOS.
+    // Avoid Wry's `transparent` feature there because it uses private WebKit
+    // configuration keys intended for macOS transparency.
+    .with_transparent(if cfg!(target_os = "ios") {
+      false
+    } else {
+      transparent
+    })
     .with_accept_first_mouse(webview_attributes.accept_first_mouse)
     .with_incognito(webview_attributes.incognito)
     .with_clipboard(webview_attributes.clipboard)
@@ -4940,6 +4948,11 @@ You may have it installed on another user account, but it is not available for t
 
   if webview_attributes.javascript_disabled {
     webview_builder = webview_builder.with_javascript_disabled();
+  }
+
+  #[cfg(target_os = "ios")]
+  if transparent && webview_attributes.background_color.is_none() {
+    webview_builder = webview_builder.with_background_color((0, 0, 0, 0));
   }
 
   if let Some(color) = webview_attributes.background_color {

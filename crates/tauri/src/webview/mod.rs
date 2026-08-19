@@ -21,7 +21,7 @@ use tauri_macros::default_runtime;
 pub use tauri_runtime::webview::{NewWindowFeatures, PageLoadEvent, ScrollBarStyle};
 // Remove this re-export in v3
 pub use tauri_runtime::Cookie;
-#[cfg(desktop)]
+#[cfg(any(desktop, target_os = "ios"))]
 use tauri_runtime::{
   dpi::{PhysicalPosition, PhysicalSize, Position, Size},
   WindowDispatch,
@@ -783,7 +783,7 @@ tauri::Builder::default()
   }
 
   /// Creates a new webview on the given window.
-  #[cfg(desktop)]
+  #[cfg(any(desktop, target_os = "ios"))]
   pub(crate) fn build(
     self,
     window: Window<R>,
@@ -1458,8 +1458,8 @@ impl<R: Runtime> Webview<R> {
   }
 }
 
-/// Desktop webview setters and actions.
-#[cfg(desktop)]
+/// Child webview setters and actions.
+#[cfg(any(desktop, target_os = "ios"))]
 impl<R: Runtime> Webview<R> {
   /// Opens the dialog to prints the contents of the webview.
   /// Currently only supported on macOS on `wry`.
